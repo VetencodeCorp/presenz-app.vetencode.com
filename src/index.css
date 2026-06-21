@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Caveat:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Caveat:wght@700&display=swap');
 @import "tailwindcss";
 
 * { box-sizing: border-box; }
@@ -29,3 +29,18 @@ input:focus, textarea:focus { border-color: #C96342 !important; outline: none; }
 .fraunces { font-family: 'Fraunces', serif; }
 .safe-bottom { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
 @media (min-width: 431px) { .mobile-shell { min-height: 860px; } }
+
+/* Toast slide-down animation */
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+.animate-slide-down {
+  animation: slide-down 0.3s ease-out;
+}
