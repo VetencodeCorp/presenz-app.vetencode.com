@@ -1,0 +1,16 @@
+﻿export const COLORS = {
+  paper: '#FAF6F0',
+  paperDark: '#F2EBE0',
+  terracotta: '#C96342',
+  terracottaDark: '#A84E32',
+  ink: '#2D2A26',
+  inkSoft: '#6B6459',
+  sage: '#7A8B6F',
+  sageBg: '#EEF1E9',
+  ochre: '#D4A24C',
+  ochreBg: '#FAF1DE',
+  rust: '#B5544A',
+  rustBg: '#F7E8E5',
+  border: '#E8DFD2',
+  white: '#FFFFFF',
+}

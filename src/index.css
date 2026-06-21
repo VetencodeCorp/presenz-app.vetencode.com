@@ -1,0 +1,31 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Caveat:wght@700&display=swap');
+@import "tailwindcss";
+
+* { box-sizing: border-box; }
+html, body, #root { min-height: 100%; }
+body {
+  margin: 0;
+  background: #EDE6D8;
+  color: #2D2A26;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, textarea { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+input::placeholder, textarea::placeholder { color: #B0A99A; }
+input:focus, textarea:focus { border-color: #C96342 !important; outline: none; }
+#root { display: flex; justify-content: center; }
+.mobile-shell {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  background: #FAF6F0;
+  position: relative;
+  overflow-x: hidden;
+  box-shadow: 0 0 0 1px rgba(45,42,38,0.04);
+}
+.screen { min-height: 100vh; padding: 44px 24px 96px; }
+.screen-no-nav { min-height: 100vh; padding: 44px 24px 28px; }
+.fraunces { font-family: 'Fraunces', serif; }
+.safe-bottom { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+@media (min-width: 431px) { .mobile-shell { min-height: 860px; } }
