@@ -20,7 +20,7 @@ export const useAuthStore = create(
           localStorage.setItem('ct_token', token)
           set({
             employee: {
-              id: karyawan.nip,
+              id: karyawan.id,
               name: user.nama,
               firstName: user.nama.split(' ')[0],
               nip: karyawan.nip,
