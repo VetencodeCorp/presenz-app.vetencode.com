@@ -1,10 +1,11 @@
-import { Bell, CalendarDays, Check, ChevronRight, Clock } from 'lucide-react'
+import { Bell, CalendarDays, ChevronRight, Clock, LogIn, LogOut } from 'lucide-react'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { COLORS } from '../constants/colors'
 import { todayLabel } from '../lib/date'
 import { useAttendanceStore } from '../store/useAttendanceStore'
 import { useAuthStore } from '../store/useAuthStore'
+import { useJadwalStore } from '../store/useJadwalStore'
 import { useReportStore } from '../store/useReportStore'
 
 function SummaryPill({ value, label, color, bg }) {
@@ -14,17 +15,46 @@ function SummaryPill({ value, label, color, bg }) {
   </div>
 }
 
-function statusLabel(status) {
-  if (status === 'pending') return 'Pending approval'
-  if (status === 'ditolak') return 'Ditolak'
-  if (status === 'hadir') return 'Disetujui'
-  return 'Belum ada status'
+function statusBadge(status) {
+  if (status === 'pending') return { label: 'Menunggu', color: COLORS.ochre, bg: COLORS.ochreBg }
+  if (status === 'ditolak') return { label: 'Ditolak', color: COLORS.rust, bg: COLORS.rustBg }
+  if (status === 'hadir') return { label: 'Disetujui', color: COLORS.sage, bg: COLORS.sageBg }
+  return null
 }
 
-function detailText(item) {
-  if (!item?.done) return 'Belum absen'
-  if (!item.detail) return `${statusLabel(item.status)} • ${item.location || 'Lokasi tercatat'}`
-  return `${statusLabel(item.status)} • ${item.detail.label} • ${item.detail.latitude.toFixed(5)}, ${item.detail.longitude.toFixed(5)}`
+function durasi(masuk, keluar) {
+  if (!masuk || !keluar) return null
+  const [hM, mM] = masuk.split(':').map(Number)
+  const [hK, mK] = keluar.split(':').map(Number)
+  const menit = (hK * 60 + mK) - (hM * 60 + mM)
+  if (menit <= 0) return null
+  const jam = Math.floor(menit / 60)
+  const sisa = menit % 60
+  return sisa === 0 ? `${jam} jam` : `${jam} jam ${sisa} menit`
+}
+
+function AbsensiRow({ icon: Icon, label, time, status, isLast }) {
+  const badge = statusBadge(status)
+  return (
+    <div className={`flex items-center gap-4 py-4 ${isLast ? '' : 'border-b'}`} style={{ borderColor: COLORS.border }}>
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
+        style={{ background: time ? COLORS.sageBg : COLORS.paperDark }}>
+        <Icon size={20} color={time ? COLORS.sage : COLORS.inkSoft} />
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="text-[12px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>{label}</div>
+        <div className="fraunces mt-0.5 text-[22px] font-bold leading-none" style={{ color: time ? COLORS.ink : COLORS.inkSoft }}>
+          {time || 'â€”'}
+        </div>
+      </div>
+      {badge && (
+        <span className="shrink-0 rounded-full px-3 py-1 text-[11px] font-bold"
+          style={{ color: badge.color, background: badge.bg }}>
+          {badge.label}
+        </span>
+      )}
+    </div>
+  )
 }
 
 export default function HomeScreen() {
@@ -32,13 +62,17 @@ export default function HomeScreen() {
   const employee = useAuthStore((s) => s.employee)
   const { monthSummary, checkIn, checkOut, loadToday, loadMonthSummary } = useAttendanceStore()
   const submitted = useReportStore((state) => state.todayReport.submitted)
+  const { jadwal, loadJadwal } = useJadwalStore()
+  const durasiKerja = durasi(checkIn.time, checkOut.time)
+  const todayJadwal = jadwal.hari.find((h) => h.is_today)
 
   useEffect(() => {
     if (employee) {
       loadToday()
       loadMonthSummary()
+      loadJadwal()
     }
-  }, [employee, loadToday, loadMonthSummary])
+  }, [employee, loadToday, loadMonthSummary, loadJadwal])
 
   if (!employee) return <main className="screen safe-bottom" />
 
@@ -68,30 +102,50 @@ export default function HomeScreen() {
         </div>
       </section>
 
-      <section className="mt-6 rounded-2xl border bg-white p-5" style={{ borderColor: COLORS.border }}>
-        <h2 className="mb-5 text-[13px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Absensi Hari Ini</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="rounded-2xl p-4" style={{ background: checkIn.done ? COLORS.sageBg : COLORS.paperDark }}>
-            <div className="flex items-center gap-3">
-              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-white"><Check color={COLORS.sage} size={26} /></span>
-              <div>
-                <b className="block uppercase" style={{ color: COLORS.inkSoft }}>Masuk</b>
-                <span className="text-[18px] font-bold" style={{ color: COLORS.ink }}>{checkIn.time || '—'}</span>
-              </div>
-            </div>
-            <p className="mt-3 text-[11px] leading-relaxed" style={{ color: COLORS.inkSoft }}>{detailText(checkIn)}</p>
-          </div>
-          <div className="rounded-2xl p-4" style={{ background: checkOut.done ? COLORS.sageBg : COLORS.paperDark }}>
-            <div className="flex items-center gap-3">
-              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-white"><Clock color={COLORS.inkSoft} size={25} /></span>
-              <div>
-                <b className="block uppercase" style={{ color: COLORS.inkSoft }}>Pulang</b>
-                <span className="text-[18px] font-bold" style={{ color: COLORS.ink }}>{checkOut.time || '—'}</span>
-              </div>
-            </div>
-            <p className="mt-3 text-[11px] leading-relaxed" style={{ color: COLORS.inkSoft }}>{detailText(checkOut)}</p>
-          </div>
+      <button
+        onClick={() => navigate('/jadwal')}
+        className="mt-6 flex w-full items-center gap-4 rounded-2xl border bg-white p-4 text-left"
+        style={{ borderColor: COLORS.border }}
+      >
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
+          style={{ background: COLORS.ochreBg }}>
+          <Clock size={22} color={COLORS.ochre} />
+        </span>
+        <div className="flex-1 min-w-0">
+          <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Shift Hari Ini</p>
+          {todayJadwal?.libur ? (
+            <p className="mt-0.5 text-[14px] font-semibold" style={{ color: COLORS.rust }}>
+              Libur Â· {todayJadwal.libur}
+            </p>
+          ) : todayJadwal?.shift ? (
+            <>
+              <p className="mt-0.5 fraunces text-[16px] font-bold" style={{ color: COLORS.ink }}>
+                {todayJadwal.shift.nama}
+              </p>
+              <p className="text-[12px]" style={{ color: COLORS.inkSoft }}>
+                {todayJadwal.shift.mulai} â€“ {todayJadwal.shift.selesai}
+              </p>
+            </>
+          ) : (
+            <p className="mt-0.5 text-[14px] italic" style={{ color: COLORS.inkSoft }}>
+              Tidak ada jadwal hari ini
+            </p>
+          )}
         </div>
+        <ChevronRight size={22} color={COLORS.inkSoft} />
+      </button>
+
+      <section className="mt-4 rounded-2xl border bg-white px-5 py-2" style={{ borderColor: COLORS.border }}>
+        <div className="flex items-center justify-between pt-3 pb-1">
+          <h2 className="text-[13px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Absensi Hari Ini</h2>
+          {durasiKerja && (
+            <span className="rounded-full px-3 py-1 text-[11px] font-bold" style={{ color: COLORS.sage, background: COLORS.sageBg }}>
+              {durasiKerja}
+            </span>
+          )}
+        </div>
+        <AbsensiRow icon={LogIn} label="Masuk" time={checkIn.time} status={checkIn.status} />
+        <AbsensiRow icon={LogOut} label="Pulang" time={checkOut.time} status={checkOut.status} isLast />
       </section>
 
       <button onClick={() => navigate('/report')}

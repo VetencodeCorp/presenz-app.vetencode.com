@@ -6,6 +6,7 @@ import Toast from './components/Toast'
 import AttendanceScreen from './screens/AttendanceScreen'
 import CameraScreen from './screens/CameraScreen'
 import HomeScreen from './screens/HomeScreen'
+import JadwalScreen from './screens/JadwalScreen'
 import LoginScreen from './screens/LoginScreen'
 import ProfileScreen from './screens/ProfileScreen'
 import ReportScreen from './screens/ReportScreen'
@@ -43,6 +44,7 @@ export default function App() {
         <Route element={<ProtectedLayout />}>
           <Route path="/" element={<HomeScreen />} />
           <Route path="/attendance" element={<AttendanceScreen />} />
+          <Route path="/jadwal" element={<JadwalScreen />} />
           <Route path="/camera/:mode" element={<CameraScreen />} />
           <Route path="/report" element={<ReportScreen />} />
           <Route path="/request" element={<RequestScreen />} />
