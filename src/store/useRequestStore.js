@@ -58,5 +58,14 @@ export const useRequestStore = create((set, get) => ({
     }
   },
 
+  loadDetail: async (id) => {
+    try {
+      const res = await api.get(`/pengajuan-absensi/${id}`)
+      return res.data.data
+    } catch (_) {
+      return null
+    }
+  },
+
   clearError: () => set({ error: '' }),
 }))

@@ -45,6 +45,32 @@ export const useAuthStore = create(
         }
       },
 
+      refreshMe: async () => {
+        try {
+          const res = await api.get('/me')
+          const { user, karyawan } = res.data
+          if (!user) return false
+          set((state) => ({
+            employee: {
+              ...(state.employee || {}),
+              id: karyawan?.id ?? state.employee?.id,
+              name: user.nama,
+              firstName: user.nama?.split(' ')[0] || '',
+              nip: karyawan?.nip ?? state.employee?.nip,
+              no_hp: karyawan?.no_hp ?? state.employee?.no_hp,
+              gender: karyawan?.gender ?? state.employee?.gender,
+              alamat: karyawan?.alamat ?? state.employee?.alamat,
+              photo: user.foto,
+              email: user.email,
+              role: state.employee?.role || 'Karyawan',
+            },
+          }))
+          return true
+        } catch (_) {
+          return false
+        }
+      },
+
       logout: () => {
         api.post('/logout').catch(() => {})
         localStorage.removeItem('ct_token')
@@ -52,6 +78,24 @@ export const useAuthStore = create(
       },
 
       clearError: () => set({ error: '', networkError: false }),
+
+      changePassword: async ({ passwordLama, passwordBaru, konfirmasi }) => {
+        try {
+          const res = await api.post('/me/change-password', {
+            password_lama: passwordLama,
+            password_baru: passwordBaru,
+            konfirmasi_password: konfirmasi,
+          })
+          return { success: true, message: res.data.message }
+        } catch (err) {
+          const msg = err.response?.data?.errors?.password_lama?.[0]
+            || err.response?.data?.errors?.password_baru?.[0]
+            || err.response?.data?.errors?.konfirmasi_password?.[0]
+            || err.response?.data?.message
+            || 'Gagal mengubah password.'
+          return { success: false, message: msg }
+        }
+      },
     }),
     {
       name: 'ct_auth',

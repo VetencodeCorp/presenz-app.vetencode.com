@@ -1,119 +1,255 @@
-﻿import { Plus, X, FileText } from "lucide-react";
-import { useRef, useState, useEffect } from "react";
+import { Plus, X, FileText, ChevronRight, CheckCircle, Edit3 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ScreenHeader from "../components/ScreenHeader";
 import { COLORS } from "../constants/colors";
+import { compressImages } from "../lib/compressImage";
 import { todayLabel } from "../lib/date";
 import { useReportStore } from "../store/useReportStore";
+
+const MIN_FOTO = 3;
+const MAX_FOTO = 5;
+
+function fmt(s) {
+  if (!s) return "-";
+  const d = new Date(s + 'T00:00:00');
+  const mons = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+  return d.getDate() + " " + mons[d.getMonth()] + " " + d.getFullYear();
+}
 
 export default function ReportScreen() {
   const navigate = useNavigate();
   const inputRef = useRef(null);
-  const { todayReport, saveReport, reports, loading, submitting, error, loadReports } = useReportStore();
+  const { todayReport, reports, loading, submitting, error, loadReports, saveReport, updateReport, clearError } = useReportStore();
+
+  const isEdit = todayReport.submitted;
   const [photos, setPhotos] = useState([]);
-  const [description, setDescription] = useState(todayReport.description);
+  const [description, setDescription] = useState('');
+  const [localError, setLocalError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+  const [compressing, setCompressing] = useState(false);
 
   useEffect(() => {
     loadReports();
   }, [loadReports]);
 
+  // Saat data hari ini terload, isi form dengan data existing (mode edit)
   useEffect(() => {
     if (todayReport.submitted) {
+      setPhotos(todayReport.photos || []);
+      setDescription(todayReport.description || '');
+    } else {
       setPhotos([]);
       setDescription('');
     }
-  }, [todayReport.submitted]);
+  }, [todayReport.submitted, todayReport.id]);
 
-  const addPhotos = (event) => {
-    const files = Array.from(event.target.files || []).slice(0, 3 - photos.length);
-    setPhotos((old) => [...old, ...files]);
+  const addPhotos = async (event) => {
+    const files = Array.from(event.target.files || []).slice(0, MAX_FOTO - photos.length);
+    event.target.value = '';
+    if (files.length === 0) return;
+    setCompressing(true);
+    try {
+      const compressed = await compressImages(files, { maxWidth: 1280, maxHeight: 1280, quality: 0.75 });
+      setPhotos((old) => [...old, ...compressed]);
+    } catch (err) {
+      setLocalError('Gagal memproses foto. Coba foto lain.');
+    } finally {
+      setCompressing(false);
+    }
   };
 
   const removePhoto = (index) => {
-    setPhotos(photos.filter((_, i) => i !== index));
+    setPhotos((old) => old.filter((_, i) => i !== index));
+  };
+
+  const photoSrc = (p) => {
+    if (p instanceof File) return URL.createObjectURL(p);
+    return p; // sudah url
   };
 
   const submit = async (event) => {
     event.preventDefault();
-    const result = await saveReport({ photos, description });
+    setLocalError('');
+    setSuccessMsg('');
+    clearError();
+
+    if (photos.length < MIN_FOTO) {
+      setLocalError(`Minimal ${MIN_FOTO} foto wajib diunggah.`);
+      return;
+    }
+    if (!description.trim()) {
+      setLocalError('Deskripsi wajib diisi.');
+      return;
+    }
+
+    const action = isEdit
+      ? updateReport(todayReport.id, { photos, description: description.trim() })
+      : saveReport({ photos, description: description.trim() });
+
+    const result = await action;
     if (result.success) {
-      navigate("/", { replace: true });
+      setSuccessMsg(result.message || 'Laporan berhasil tersimpan.');
     }
   };
 
-  const fmt = (s) => {
-    if (!s) return "-";
-    const d = new Date(s);
-    const mons = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
-    return d.getDate() + " " + mons[d.getMonth()] + " " + d.getFullYear();
-  };
+  const errorMsg = localError || error;
+  const recentReports = reports.slice(0, 5);
 
   return (
-    <main className="screen-no-nav flex flex-col">
+    <main className="screen safe-bottom">
       <ScreenHeader title="Laporan Kegiatan" subtitle={todayLabel()} backTo="/" />
 
-      {error && <div className="mx-5 mb-4 rounded-xl border px-4 py-3 text-sm font-semibold" style={{ borderColor: COLORS.terracotta, color: COLORS.terracotta }}>{error}</div>}
+      {errorMsg && (
+        <div className="mb-4 flex items-start gap-3 rounded-xl border px-4 py-3 text-[13px]"
+          style={{ borderColor: COLORS.rust, background: COLORS.rustBg, color: COLORS.rust }}>
+          <X size={18} className="mt-0.5 shrink-0" />
+          <p className="font-semibold leading-snug">{errorMsg}</p>
+        </div>
+      )}
+      {successMsg && (
+        <div className="mb-4 flex items-center gap-2 rounded-xl border px-4 py-3 text-[13px] font-semibold"
+          style={{ borderColor: COLORS.sage, background: COLORS.sageBg, color: COLORS.sage }}>
+          <CheckCircle size={16} /> {successMsg}
+        </div>
+      )}
 
-      <form onSubmit={submit} className="flex-1 overflow-y-auto px-5">
+      {isEdit && (
+        <div className="mb-4 flex items-center gap-2 rounded-xl px-4 py-2.5 text-[12px] font-semibold"
+          style={{ background: COLORS.ochreBg, color: COLORS.ochre }}>
+          <Edit3 size={14} /> Mode ubah — laporan hari ini sudah ada
+        </div>
+      )}
+
+      <form onSubmit={submit}>
         <section>
-          <h2 className="mb-4 text-[13px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>
-            Foto Kegiatan ({photos.length}/3)
+          <h2 className="mb-3 text-[12px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>
+            Foto Kegiatan ({photos.length}/{MAX_FOTO})
           </h2>
-          <div className="mb-4 flex gap-3 overflow-x-auto">
+          <div className="mb-2 flex gap-2.5 flex-wrap">
             {photos.map((photo, index) => (
-              <div key={index} className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border" style={{ borderColor: COLORS.border }}>
-                <img src={URL.createObjectURL(photo)} alt="Kegiatan" className="h-full w-full object-cover" />
-                <button type="button" onClick={() => removePhoto(index)} className="absolute right-1 top-1 rounded-full bg-white p-1">
-                  <X size={16} color={COLORS.rust} />
+              <div key={index} className="relative h-20 w-20 overflow-hidden rounded-xl border" style={{ borderColor: COLORS.border }}>
+                <img src={photoSrc(photo)} alt={`Foto ${index + 1}`} className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => removePhoto(index)}
+                  className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white shadow"
+                >
+                  <X size={14} color={COLORS.rust} />
                 </button>
               </div>
             ))}
-            {photos.length < 3 && (
-              <button type="button" onClick={() => inputRef.current?.click()} className="flex h-20 w-20 shrink-0 flex-col items-center justify-center rounded-xl border border-dashed" style={{ borderColor: COLORS.border, color: COLORS.terracotta }}>
-                <Plus size={28} />
-                <span className="mt-2 text-sm" style={{ color: COLORS.inkSoft }}>Tambah</span>
+            {compressing && (
+              <div className="flex h-20 w-20 items-center justify-center rounded-xl border" style={{ borderColor: COLORS.border, background: COLORS.paperDark }}>
+                <span className="text-[10px] font-bold animate-pulse" style={{ color: COLORS.inkSoft }}>Memproses...</span>
+              </div>
+            )}
+            {photos.length < MAX_FOTO && !compressing && (
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                className="flex h-20 w-20 flex-col items-center justify-center rounded-xl border border-dashed"
+                style={{ borderColor: COLORS.border, color: COLORS.terracotta }}
+              >
+                <Plus size={24} />
+                <span className="mt-1 text-[11px]" style={{ color: COLORS.inkSoft }}>Tambah</span>
               </button>
             )}
           </div>
           <input ref={inputRef} onChange={addPhotos} type="file" accept="image/*" multiple className="hidden" />
-          <p className="text-[13px]" style={{ color: COLORS.inkSoft }}>Ambil dari kamera atau pilih dari galeri (max 3).</p>
+          <p className="text-[11.5px]" style={{ color: COLORS.inkSoft }}>
+            Min {MIN_FOTO}, max {MAX_FOTO} foto. Ambil dari kamera atau galeri.
+          </p>
         </section>
 
-        <label className="mt-6 block">
-          <span className="mb-4 block text-[13px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Deskripsi Kegiatan</span>
-          <textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Apa saja yang dikerjakan hari ini?" className="h-28 w-full resize-none rounded-2xl border bg-white p-5 text-[13px]" style={{ borderColor: COLORS.border, color: COLORS.ink }} />
+        <label className="mt-5 block">
+          <span className="mb-2 block text-[12px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>
+            Deskripsi Kegiatan
+          </span>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Apa saja yang dikerjakan hari ini?"
+            maxLength={1000}
+            className="h-28 w-full resize-none rounded-2xl border bg-white p-4 text-[14px]"
+            style={{ borderColor: COLORS.border, color: COLORS.ink }}
+          />
+          <span className="mt-1 block text-right text-[10px]" style={{ color: COLORS.inkSoft }}>
+            {description.length}/1000
+          </span>
         </label>
 
-        <button disabled={submitting} className="mt-5 h-12 w-full rounded-xl text-[13px] font-bold text-white disabled:opacity-60" style={{ background: COLORS.terracotta, boxShadow: "0 4px 14px rgba(201,99,66,0.3)" }}>
-          {submitting ? 'Mengirim...' : 'Kirim Laporan'}
+        <button
+          type="submit"
+          disabled={submitting || compressing}
+          className="mt-3 h-13 w-full rounded-xl py-3.5 text-[14px] font-bold text-white disabled:opacity-60"
+          style={{ background: COLORS.terracotta, boxShadow: "0 4px 14px rgba(201,99,66,0.3)" }}
+        >
+          {compressing ? 'Memproses foto...' : submitting ? 'Menyimpan...' : isEdit ? 'Simpan Perubahan' : 'Kirim Laporan'}
         </button>
-        <p className="mt-3 text-center text-[13px]" style={{ color: COLORS.inkSoft }}>Bisa diubah sampai tengah malam hari ini.</p>
+        <p className="mt-3 text-center text-[12px]" style={{ color: COLORS.inkSoft }}>
+          Laporan hanya bisa diubah pada hari yang sama.
+        </p>
       </form>
 
-      <section className="px-5 pb-8 pt-6 border-t" style={{ borderColor: COLORS.border }}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[13px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Riwayat Laporan</h2>
-          <FileText size={20} color={COLORS.inkSoft} />
+      {/* RIWAYAT */}
+      <section className="mt-8 border-t pt-6" style={{ borderColor: COLORS.border }}>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-[12px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>
+            Riwayat Terbaru
+          </h2>
+          {reports.length > 0 && (
+            <button
+              type="button"
+              onClick={() => navigate('/reports')}
+              className="flex items-center gap-1 text-[12px] font-bold"
+              style={{ color: COLORS.terracotta }}
+            >
+              Lihat Semua <ChevronRight size={14} />
+            </button>
+          )}
         </div>
 
         {loading ? (
-          <p className="text-center text-[13px]" style={{ color: COLORS.inkSoft }}>Memuat laporan...</p>
-        ) : reports.length === 0 ? (
-          <div className="text-center py-8 rounded-2xl border border-dashed" style={{ borderColor: COLORS.border, color: COLORS.inkSoft }}>
-            <FileText size={32} className="mx-auto mb-2 opacity-50" />
-            <p className="text-[13px]">Belum ada laporan yang dikirim.</p>
+          <p className="rounded-xl border bg-white px-4 py-3 text-sm font-semibold"
+            style={{ borderColor: COLORS.border, color: COLORS.inkSoft }}>
+            Memuat...
+          </p>
+        ) : recentReports.length === 0 ? (
+          <div className="rounded-2xl border border-dashed py-6 text-center"
+            style={{ borderColor: COLORS.border, color: COLORS.inkSoft }}>
+            <FileText size={28} className="mx-auto mb-2 opacity-50" />
+            <p className="text-[13px]">Belum ada laporan.</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {reports.map((r) => (
-              <div key={r.id} className="rounded-2xl border bg-white p-4" style={{ borderColor: COLORS.border }}>
-                <div className="flex items-center justify-between mb-2">
-                  <b className="text-[13px]" style={{ color: COLORS.ink }}>{fmt(r.tanggal)}</b>
-                  <span className="rounded-xl px-3 py-1 text-[12px] font-bold" style={{ background: COLORS.sageBg, color: COLORS.sage }}>Terkirim</span>
+          <div className="flex flex-col gap-2.5">
+            {recentReports.map((r) => (
+              <button
+                key={r.id}
+                type="button"
+                onClick={() => navigate(`/reports/${r.id}`)}
+                className="flex items-center gap-3 rounded-2xl border bg-white p-3 text-left"
+                style={{ borderColor: COLORS.border }}
+              >
+                {r.foto?.[0] ? (
+                  <img src={r.foto[0]} alt="thumb" className="h-12 w-12 shrink-0 rounded-xl object-cover" />
+                ) : (
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
+                    style={{ background: COLORS.paperDark }}>
+                    <FileText size={18} color={COLORS.inkSoft} />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-bold" style={{ color: COLORS.ink }}>{fmt(r.tanggal)}</p>
+                  <p className="mt-0.5 text-[12px] leading-snug line-clamp-1" style={{ color: COLORS.inkSoft }}>
+                    {r.deskripsi}
+                  </p>
                 </div>
-                <p className="text-[13px] leading-relaxed line-clamp-2" style={{ color: COLORS.inkSoft }}>{r.deskripsi}</p>
-                {r.foto?.length > 0 && <p className="mt-1 text-[13px]" style={{ color: COLORS.inkSoft }}>{r.foto.length} foto</p>}
-              </div>
+                <span className="text-[11px] font-semibold whitespace-nowrap" style={{ color: COLORS.inkSoft }}>
+                  {r.foto_count || r.foto?.length || 0} foto
+                </span>
+                <ChevronRight size={16} color={COLORS.inkSoft} className="shrink-0" />
+              </button>
             ))}
           </div>
         )}

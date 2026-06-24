@@ -1,7 +1,9 @@
-import { CalendarDays, FileText, Heart, Paperclip, Trash2, X } from 'lucide-react'
+import { CalendarDays, ChevronRight, FileText, Heart, Paperclip, Trash2, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import ScreenHeader from '../components/ScreenHeader'
 import { COLORS } from '../constants/colors'
+import { compressImage } from '../lib/compressImage'
 import { useRequestStore } from '../store/useRequestStore'
 
 const TIPE_OPTIONS = [
@@ -76,6 +78,7 @@ function HistoryCard({ item, onCancel }) {
 }
 
 export default function RequestScreen() {
+  const navigate = useNavigate()
   const { list, loading, submitting, error, loadList, submit, cancel, clearError } = useRequestStore()
 
   const today = new Date().toISOString().slice(0, 10)
@@ -253,7 +256,16 @@ export default function RequestScreen() {
           <input
             type="file"
             accept="image/*"
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            onChange={async (e) => {
+              const f = e.target.files?.[0]
+              if (!f) { setFile(null); return }
+              try {
+                const compressed = await compressImage(f, { maxWidth: 1280, maxHeight: 1280, quality: 0.75 })
+                setFile(compressed)
+              } catch {
+                setFile(f)
+              }
+            }}
             className="hidden"
             id="proof"
           />
@@ -293,9 +305,21 @@ export default function RequestScreen() {
 
       {/* RIWAYAT */}
       <section className="mt-10">
-        <h2 className="mb-3 text-[12px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>
-          Riwayat Pengajuan
-        </h2>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-[12px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>
+            Riwayat Terbaru
+          </h2>
+          {list.length > 0 && (
+            <button
+              type="button"
+              onClick={() => navigate('/requests')}
+              className="flex items-center gap-1 text-[12px] font-bold"
+              style={{ color: COLORS.terracotta }}
+            >
+              Lihat Semua <ChevronRight size={14} />
+            </button>
+          )}
+        </div>
         {loading ? (
           <p className="rounded-xl border bg-white px-4 py-3 text-sm font-semibold"
             style={{ borderColor: COLORS.border, color: COLORS.inkSoft }}>
@@ -308,7 +332,7 @@ export default function RequestScreen() {
           </p>
         ) : (
           <div className="flex flex-col gap-3">
-            {list.map((item) => (
+            {list.slice(0, 5).map((item) => (
               <HistoryCard key={item.id} item={item} onCancel={onCancel} />
             ))}
           </div>

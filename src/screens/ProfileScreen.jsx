@@ -1,5 +1,6 @@
 import { Bell, Briefcase, ChevronRight, HelpCircle, Lock, LogOut, Phone, Mail, MapPin } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import Avatar from '../components/Avatar'
 import { COLORS } from '../constants/colors'
 import { useAuthStore } from '../store/useAuthStore'
 import { useAttendanceStore } from '../store/useAttendanceStore'
@@ -39,8 +40,18 @@ export default function ProfileScreen() {
   return (
     <main className="screen safe-bottom pt-14">
       <section className="mb-8 text-center">
-        <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full fraunces text-[36px] font-bold text-white" style={{ background: COLORS.terracotta, boxShadow: '0 8px 20px rgba(201,99,66,0.3)' }}>
-          {employee?.name?.[0] || '?'}
+        <div className="mx-auto inline-block">
+          <Avatar
+            name={employee?.name}
+            src={employee?.photo}
+            size={96}
+            rounded="full"
+            bg={COLORS.terracotta}
+            textColor={COLORS.white}
+            borderColor="transparent"
+            fontSize={36}
+            shadow="0 8px 20px rgba(201,99,66,0.3)"
+          />
         </div>
         <h1 className="fraunces mt-4 text-[26px] font-bold" style={{ color: COLORS.ink }}>{employee?.name}</h1>
         <span className="mt-3 inline-flex rounded-full px-5 py-2 text-[14px] font-bold" style={{ background: COLORS.sageBg, color: COLORS.sage }}>{employee?.role || 'Karyawan'}</span>
@@ -54,7 +65,7 @@ export default function ProfileScreen() {
       </section>
 
       <section className="mt-8 overflow-hidden rounded-2xl border bg-white" style={{ borderColor: COLORS.border }}>
-        <MenuRow icon={Lock} label="Ubah Kata Sandi" />
+        <MenuRow icon={Lock} label="Ubah Kata Sandi" onClick={() => navigate('/change-password')} />
         <MenuRow icon={Bell} label="Pengaturan Notifikasi" />
         <MenuRow icon={HelpCircle} label="Bantuan" />
         <MenuRow icon={LogOut} label="Keluar" danger onClick={signOut} />

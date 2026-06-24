@@ -35,6 +35,7 @@ export const useAttendanceStore = create(
       monthSummary: emptySummary,
       checkIn: emptyCheckIn,
       checkOut: emptyCheckOut,
+      pengajuanAktif: null,
       loading: false,
       submitting: false,
       error: '',
@@ -43,7 +44,12 @@ export const useAttendanceStore = create(
         set({ loading: true, error: '' })
         try {
           const res = await api.get('/presensi/hari-ini')
-          set({ ...mapAbsensi(res.data.data), loading: false, error: '' })
+          set({
+            ...mapAbsensi(res.data.data),
+            pengajuanAktif: res.data.pengajuan_aktif || null,
+            loading: false,
+            error: '',
+          })
           return res.data.data
         } catch (err) {
           const message = err.response?.data?.message || 'Gagal memuat absensi hari ini.'
@@ -58,6 +64,23 @@ export const useAttendanceStore = create(
           set({ monthSummary: res.data.data?.summary || emptySummary })
         } catch (_) {
           set({ monthSummary: emptySummary })
+        }
+      },
+
+      riwayat: [],
+
+      loadRiwayat: async ({ limit, month, year } = {}) => {
+        try {
+          const params = {}
+          if (limit) params.limit = limit
+          if (month) params.month = month
+          if (year) params.year = year
+          const res = await api.get('/presensi/riwayat', { params })
+          set({ riwayat: res.data.data || [] })
+          return res.data.data
+        } catch (_) {
+          set({ riwayat: [] })
+          return []
         }
       },
 
@@ -86,6 +109,7 @@ export const useAttendanceStore = create(
         checkIn: emptyCheckIn,
         checkOut: emptyCheckOut,
         monthSummary: emptySummary,
+        pengajuanAktif: null,
         loading: false,
         submitting: false,
         error: '',
@@ -93,7 +117,7 @@ export const useAttendanceStore = create(
     }),
     {
       name: 'ct_attendance',
-      partialize: (state) => ({ monthSummary: state.monthSummary, checkIn: state.checkIn, checkOut: state.checkOut }),
+      partialize: (state) => ({ monthSummary: state.monthSummary, checkIn: state.checkIn, checkOut: state.checkOut, pengajuanAktif: state.pengajuanAktif }),
     },
   ),
 )
