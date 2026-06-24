@@ -78,14 +78,25 @@ export default function CameraScreen() {
     const canvas = canvasRef.current
     if (!video || !canvas || !cameraReady) return
 
-    canvas.width = video.videoWidth
-    canvas.height = video.videoHeight
+    // Resize ke max 1280px (lebar/tinggi) sambil jaga aspect ratio supaya file kecil
+    const MAX_DIM = 1280
+    let w = video.videoWidth
+    let h = video.videoHeight
+    if (w > MAX_DIM || h > MAX_DIM) {
+      const ratio = Math.min(MAX_DIM / w, MAX_DIM / h)
+      w = Math.round(w * ratio)
+      h = Math.round(h * ratio)
+    }
+
+    canvas.width = w
+    canvas.height = h
     const ctx = canvas.getContext('2d')
     ctx.translate(canvas.width, 0)
     ctx.scale(-1, 1)
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
 
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.9))
+    // Quality 0.75 — balance antara size dan kejelasan untuk verifikasi wajah
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.75))
     if (!blob) {
       setError('Gagal mengambil foto. Coba ulangi.')
       return

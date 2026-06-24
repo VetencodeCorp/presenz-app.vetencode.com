@@ -6,7 +6,23 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   server: {
     host: true,
-    allowedHosts: ['.ngrok-free.dev', '.ngrok-free.app', '.ngrok.io', '.trycloudflare.com', '.loca.lt'],
+    // Allow all hosts (untuk dev mode supaya ngrok / tunnel apapun bisa akses)
+    allowedHosts: true,
+    proxy: {
+      // Forward semua request /api/* ke Laravel backend lokal
+      // Jadi dari HP cukup akses URL ngrok app, backend tetap di laptop
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+      // Forward juga akses storage (gambar) ke Laravel
+      '/storage': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   plugins: [
     react(),
