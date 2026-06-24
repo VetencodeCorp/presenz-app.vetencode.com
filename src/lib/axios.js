@@ -4,6 +4,10 @@ import { useNetworkStore } from '../store/useNetworkStore'
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '',
   timeout: 15000,
+  headers: {
+    // Wajib supaya ngrok free tier tidak return warning HTML page
+    'ngrok-skip-browser-warning': 'true',
+  },
 })
 
 // Clear server error flag on any successful request (backend is back)
@@ -34,6 +38,8 @@ api.interceptors.response.use(
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('ct_token')
   if (token) config.headers.Authorization = 'Bearer ' + token
+  // Ensure ngrok header tetap ada (supaya bypass warning page tiap request)
+  config.headers['ngrok-skip-browser-warning'] = 'true'
   return config
 })
 

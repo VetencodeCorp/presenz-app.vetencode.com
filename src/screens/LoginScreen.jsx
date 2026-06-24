@@ -33,8 +33,8 @@ export default function LoginScreen() {
       </div>
       <form onSubmit={submit} className="space-y-5">
         <label className="block">
-          <span className="mb-3 block text-[15px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>ID Karyawan</span>
-          <input value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} placeholder="contoh: TK-014" className="h-14 w-full rounded-xl border bg-white px-5 text-[17px]" style={{ borderColor: COLORS.border, color: COLORS.ink }} />
+          <span className="mb-3 block text-[15px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Username</span>
+          <input value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} placeholder="username Anda" className="h-14 w-full rounded-xl border bg-white px-5 text-[17px]" style={{ borderColor: COLORS.border, color: COLORS.ink }} />
         </label>
         <label className="block">
           <span className="mb-3 block text-[15px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Kata Sandi</span>

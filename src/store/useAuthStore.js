@@ -12,10 +12,10 @@ export const useAuthStore = create(
       error: '',
       networkError: false,
 
-      login: async (nip, password) => {
+      login: async (username, password) => {
         set({ loading: true, error: '', networkError: false })
         try {
-          const res = await api.post('/login', { nip, password })
+          const res = await api.post('/login', { username, password })
           const { token, user, karyawan } = res.data
           localStorage.setItem('ct_token', token)
           set({
@@ -38,7 +38,7 @@ export const useAuthStore = create(
           if (!err.response) {
             set({ loading: false, error: 'Gagal terhubung ke server. Periksa koneksi Anda.', networkError: true })
           } else {
-            const msg = err.response?.data?.errors?.nip?.[0] || err.response?.data?.message || 'NIP atau kata sandi tidak sesuai.'
+            const msg = err.response?.data?.errors?.username?.[0] || err.response?.data?.message || 'Username atau kata sandi tidak sesuai.'
             set({ loading: false, error: msg, networkError: false })
           }
           return false
