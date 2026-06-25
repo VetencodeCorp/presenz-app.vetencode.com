@@ -18,7 +18,7 @@ function statusBadge(row) {
   if (kat === 'izin') return { label: 'Izin', color: COLORS.ochre, bg: COLORS.ochreBg }
   if (kat === 'cuti') return { label: 'Cuti', color: COLORS.sage, bg: COLORS.sageBg }
   if (kat === 'alpha') return { label: 'Alpha', color: COLORS.ink, bg: COLORS.paperDark }
-  if (row.status === 'hadir') return { label: 'Hadir', color: COLORS.sage, bg: COLORS.sageBg }
+  if (row.status === 'disetujui') return { label: 'Hadir', color: COLORS.sage, bg: COLORS.sageBg }
   if (row.status === 'pending') return { label: 'Menunggu', color: COLORS.ochre, bg: COLORS.ochreBg }
   if (row.status === 'ditolak') return { label: 'Ditolak', color: COLORS.rust, bg: COLORS.rustBg }
   return { label: row.status || '-', color: COLORS.inkSoft, bg: COLORS.paperDark }
