@@ -19,7 +19,7 @@ function SummaryPill({ value, label, color, bg }) {
 function statusBadge(status) {
   if (status === 'pending') return { label: 'Menunggu', color: COLORS.ochre, bg: COLORS.ochreBg }
   if (status === 'ditolak') return { label: 'Ditolak', color: COLORS.rust, bg: COLORS.rustBg }
-  if (status === 'hadir') return { label: 'Disetujui', color: COLORS.sage, bg: COLORS.sageBg }
+  if (status === 'disetujui') return { label: 'Disetujui', color: COLORS.sage, bg: COLORS.sageBg }
   return null
 }
 
@@ -225,7 +225,7 @@ export default function HomeScreen() {
               else if (kat === 'izin') badge = { label: 'Izin', color: COLORS.ochre, bg: COLORS.ochreBg }
               else if (kat === 'cuti') badge = { label: 'Cuti', color: COLORS.sage, bg: COLORS.sageBg }
               else if (kat === 'alpha') badge = { label: 'Alpha', color: COLORS.ink, bg: COLORS.paperDark }
-              else if (r.status === 'hadir') badge = { label: 'Hadir', color: COLORS.sage, bg: COLORS.sageBg }
+              else if (r.status === 'disetujui') badge = { label: 'Hadir', color: COLORS.sage, bg: COLORS.sageBg }
               else if (r.status === 'pending') badge = { label: 'Menunggu', color: COLORS.ochre, bg: COLORS.ochreBg }
               else if (r.status === 'ditolak') badge = { label: 'Ditolak', color: COLORS.rust, bg: COLORS.rustBg }
               else badge = { label: r.status || '-', color: COLORS.inkSoft, bg: COLORS.paperDark }

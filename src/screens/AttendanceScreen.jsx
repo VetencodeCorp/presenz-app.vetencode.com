@@ -8,7 +8,7 @@ import { useAttendanceStore } from '../store/useAttendanceStore'
 function statusBadge(status) {
   if (status === 'pending') return { label: 'Menunggu', color: COLORS.ochre, bg: COLORS.ochreBg }
   if (status === 'ditolak') return { label: 'Ditolak', color: COLORS.rust, bg: COLORS.rustBg }
-  if (status === 'hadir') return { label: 'Disetujui', color: COLORS.sage, bg: COLORS.sageBg }
+  if (status === 'disetujui') return { label: 'Disetujui', color: COLORS.sage, bg: COLORS.sageBg }
   return null
 }
 
