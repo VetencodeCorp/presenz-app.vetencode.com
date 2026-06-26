@@ -106,7 +106,11 @@ export default function HomeScreen() {
   const employee = useAuthStore((s) => s.employee)
   const refreshMe = useAuthStore((s) => s.refreshMe)
   const { monthSummary, checkIn, checkOut, pengajuanAktif, riwayat, loadToday, loadMonthSummary, loadRiwayat } = useAttendanceStore()
-  const submitted = useReportStore((state) => state.todayReport.submitted)
+  const submitted = useReportStore((state) => {
+    const today = new Date().toISOString().slice(0, 10)
+    return state.reports.some((r) => r.tanggal === today)
+  })
+  const loadReports = useReportStore((s) => s.loadReports)
   const { jadwal, loadJadwal } = useJadwalStore()
   const durasiKerja = durasi(checkIn.time, checkOut.time)
   const todayJadwal = jadwal.hari.find((h) => h.is_today)
@@ -118,8 +122,9 @@ export default function HomeScreen() {
       loadMonthSummary()
       loadJadwal()
       loadRiwayat({ limit: 5 })
+      loadReports()
     }
-  }, [employee?.id, refreshMe, loadToday, loadMonthSummary, loadJadwal, loadRiwayat])
+  }, [employee?.id, refreshMe, loadToday, loadMonthSummary, loadJadwal, loadRiwayat, loadReports])
 
   if (!employee) return <main className="screen safe-bottom" />
 
@@ -274,7 +279,7 @@ export default function HomeScreen() {
 
       <button onClick={() => navigate('/report')}
         className="mt-6 w-full rounded-2xl p-6 text-left text-white"
-        style={{ background: submitted ? COLORS.sage : COLORS.terracotta, boxShadow: '0 8px 20px rgba(201,99,66,0.28)' }}>
+        style={{ background: submitted ? COLORS.sage : COLORS.terracotta, boxShadow: '0 8px 20px rgba(59,62,148,0.28)' }}>
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="mb-4 text-[13px] font-bold uppercase tracking-wide">{submitted ? 'Sudah Dilaporkan' : 'Belum Dilaporkan'}</p>
