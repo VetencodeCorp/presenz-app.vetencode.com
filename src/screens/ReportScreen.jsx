@@ -7,7 +7,7 @@ import { compressImages } from "../lib/compressImage";
 import { todayLabel } from "../lib/date";
 import { useReportStore } from "../store/useReportStore";
 
-const MIN_FOTO = 3;
+const MIN_FOTO = 1;
 const MAX_FOTO = 5;
 
 function fmt(s) {

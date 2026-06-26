@@ -27,8 +27,8 @@ export default function LoginScreen() {
   return (
     <main className="screen-no-nav flex flex-col justify-center">
       <div className="mb-8">
-        <div className="mb-8 flex h-[52px] w-[62px] items-center justify-center rounded-2xl text-[26px] font-bold text-white shadow-lg -rotate-2 fraunces" style={{ background: COLORS.terracotta, boxShadow: '0 8px 20px rgba(201,99,66,0.3)' }}>T</div>
-        <h1 className="fraunces text-[30px] font-bold leading-tight tracking-[-0.03em]" style={{ color: COLORS.ink }}>Catatan Tugas</h1>
+        <div className="mb-8 flex h-[55px] w-[60px] items-center justify-center rounded-2xl text-[26px] font-bold text-white shadow-lg -rotate-2 fraunces" style={{ background: COLORS.terracotta, boxShadow: '0 8px 20px rgba(201,99,66,0.3)' }}>P</div>
+        <h1 className="fraunces text-[30px] font-bold leading-tight tracking-[-0.03em]" style={{ color: COLORS.ink }}>PresenZ</h1>
         <p className="mt-4 text-[17px] leading-relaxed" style={{ color: COLORS.inkSoft }}>Absensi & laporan kerja harian untuk perawatan kuda, burung, dan taman.</p>
       </div>
       <form onSubmit={submit} className="space-y-5">
