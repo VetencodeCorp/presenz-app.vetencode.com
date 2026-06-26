@@ -9,7 +9,7 @@ import { useRequestStore } from '../store/useRequestStore'
 const TIPE_OPTIONS = [
   { id: 'sakit', label: 'Sakit', icon: Heart, color: COLORS.rust, bg: COLORS.rustBg },
   { id: 'izin', label: 'Izin', icon: FileText, color: COLORS.ochre, bg: COLORS.ochreBg },
-  { id: 'cuti', label: 'Cuti', icon: CalendarDays, color: COLORS.sage, bg: COLORS.sageBg },
+  // { id: 'cuti', label: 'Cuti', icon: CalendarDays, color: COLORS.sage, bg: COLORS.sageBg },
 ]
 
 function statusBadge(status) {
@@ -169,7 +169,7 @@ export default function RequestScreen() {
 
       <form onSubmit={onSubmit}>
         {/* TIPE */}
-        <div className="mb-5 grid grid-cols-3 gap-3">
+        <div className="mb-5 grid grid-cols-2 gap-3">
           {TIPE_OPTIONS.map(({ id, label, icon: Icon, color, bg }) => {
             const active = tipe === id
             return (
