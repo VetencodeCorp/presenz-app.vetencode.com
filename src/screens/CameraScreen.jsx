@@ -245,7 +245,7 @@ export default function CameraScreen() {
             onClick={submit}
             disabled={submitting}
             className="flex h-14 items-center justify-center rounded-xl text-[15px] font-bold text-white disabled:opacity-50"
-            style={{ background: COLORS.terracotta, boxShadow: '0 4px 14px rgba(201,99,66,0.4)' }}
+            style={{ background: COLORS.terracotta, boxShadow: '0 4px 14px rgba(59,62,148,0.4)' }}
           >
             {submitting ? 'Mengirim...' : 'Kirim Absen'}
           </button>

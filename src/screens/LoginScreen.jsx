@@ -27,7 +27,9 @@ export default function LoginScreen() {
   return (
     <main className="screen-no-nav flex flex-col justify-center">
       <div className="mb-8">
-        <div className="mb-8 flex h-[55px] w-[60px] items-center justify-center rounded-2xl text-[26px] font-bold text-white shadow-lg -rotate-2 fraunces" style={{ background: COLORS.terracotta, boxShadow: '0 8px 20px rgba(201,99,66,0.3)' }}>P</div>
+        <div className="mb-8 flex h-[72px] w-[72px] items-center justify-center">
+          <img src="/logo.png" alt="PresenZ" className="h-full w-full object-contain" />
+        </div>
         <h1 className="fraunces text-[30px] font-bold leading-tight tracking-[-0.03em]" style={{ color: COLORS.ink }}>PresenZ</h1>
         <p className="mt-4 text-[17px] leading-relaxed" style={{ color: COLORS.inkSoft }}>Absensi & laporan kerja harian untuk perawatan kuda, burung, dan taman.</p>
       </div>
@@ -46,7 +48,7 @@ export default function LoginScreen() {
           </div>
         </label>
         {error && <p className="rounded-xl px-4 py-3 text-sm font-semibold" style={{ background: storeError ? COLORS.rustBg : COLORS.rustBg, color: COLORS.rust }}>{error}</p>}
-        <button className="mt-6 h-14 w-full rounded-xl text-[17px] font-bold text-white" style={{ background: COLORS.terracotta, boxShadow: '0 4px 14px rgba(201,99,66,0.3)' }}>
+        <button className="mt-6 h-14 w-full rounded-xl text-[17px] font-bold text-white" style={{ background: COLORS.terracotta, boxShadow: '0 4px 14px rgba(59,62,148,0.3)' }}>
           {loading ? 'Memproses...' : 'Masuk'}
         </button>
       </form>

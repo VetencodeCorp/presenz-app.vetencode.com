@@ -115,7 +115,7 @@ export default function ReportDetailScreen() {
           type="button"
           onClick={() => navigate('/report')}
           className="flex h-13 w-full items-center justify-center gap-2 rounded-xl py-3.5 text-[14px] font-bold text-white"
-          style={{ background: COLORS.terracotta, boxShadow: '0 4px 14px rgba(201,99,66,0.3)' }}
+          style={{ background: COLORS.terracotta, boxShadow: '0 4px 14px rgba(59,62,148,0.3)' }}
         >
           <Edit3 size={16} /> Edit Laporan
         </button>

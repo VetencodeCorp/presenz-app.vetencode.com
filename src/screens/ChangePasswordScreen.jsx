@@ -124,7 +124,7 @@ export default function ChangePasswordScreen() {
           type="submit"
           disabled={submitting}
           className="mt-2 h-13 w-full rounded-xl py-3.5 text-[14px] font-bold text-white disabled:opacity-60"
-          style={{ background: COLORS.terracotta, boxShadow: '0 4px 14px rgba(201,99,66,0.3)' }}
+          style={{ background: COLORS.terracotta, boxShadow: '0 4px 14px rgba(59,62,148,0.3)' }}
         >
           {submitting ? 'Menyimpan...' : 'Simpan Password Baru'}
         </button>

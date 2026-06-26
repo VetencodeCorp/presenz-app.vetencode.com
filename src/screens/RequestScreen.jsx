@@ -293,7 +293,7 @@ export default function RequestScreen() {
           type="submit"
           disabled={submitting}
           className="h-14 w-full rounded-xl text-[14px] font-bold text-white disabled:opacity-60"
-          style={{ background: COLORS.terracotta, boxShadow: '0 4px 14px rgba(201,99,66,0.3)' }}
+          style={{ background: COLORS.terracotta, boxShadow: '0 4px 14px rgba(59,62,148,0.3)' }}
         >
           {submitting ? 'Mengirim...' : 'Kirim Pengajuan'}
         </button>

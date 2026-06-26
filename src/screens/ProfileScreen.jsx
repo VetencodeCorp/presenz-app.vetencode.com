@@ -50,7 +50,7 @@ export default function ProfileScreen() {
             textColor={COLORS.white}
             borderColor="transparent"
             fontSize={36}
-            shadow="0 8px 20px rgba(201,99,66,0.3)"
+            shadow="0 8px 20px rgba(59,62,148,0.3)"
           />
         </div>
         <h1 className="fraunces mt-4 text-[26px] font-bold" style={{ color: COLORS.ink }}>{employee?.name}</h1>

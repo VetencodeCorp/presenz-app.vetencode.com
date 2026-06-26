@@ -30,7 +30,7 @@ function AbsenCard({ icon: Icon, label, item, disabled, onClick, hint }) {
         className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl"
         style={{
           background: done ? COLORS.white : COLORS.terracotta,
-          boxShadow: done ? 'none' : '0 4px 12px rgba(201,99,66,0.25)',
+          boxShadow: done ? 'none' : '0 4px 12px rgba(59,62,148,0.25)',
         }}
       >
         <Icon size={26} color={done ? COLORS.sage : COLORS.white} />
