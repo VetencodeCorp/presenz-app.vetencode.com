@@ -1,5 +1,6 @@
-import { Clock, History, LogIn, LogOut } from 'lucide-react'
+import { ChevronRight, History, LogIn, LogOut } from 'lucide-react'
 import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import ScreenHeader from '../components/ScreenHeader'
 import { COLORS } from '../constants/colors'
 import { useAttendanceStore } from '../store/useAttendanceStore'
@@ -38,6 +39,7 @@ function groupByMonth(items) {
 }
 
 export default function AttendanceHistoryScreen() {
+  const navigate = useNavigate()
   const { riwayat, loadRiwayat } = useAttendanceStore()
 
   useEffect(() => {
@@ -68,17 +70,22 @@ export default function AttendanceHistoryScreen() {
                   const badge = statusBadge(r)
                   const noPhysical = !r.jam_masuk
                   return (
-                    <div
+                    <button
                       key={r.id}
-                      className="rounded-2xl border bg-white p-3"
+                      type="button"
+                      onClick={() => navigate(`/attendance-history/${r.id}`)}
+                      className="w-full rounded-2xl border bg-white p-3 text-left transition-colors hover:bg-paper"
                       style={{ borderColor: COLORS.border }}
                     >
                       <div className="flex items-center justify-between gap-2 mb-2">
                         <p className="text-[13px] font-bold" style={{ color: COLORS.ink }}>{fmt(r.tanggal)}</p>
-                        <span className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide"
-                          style={{ color: badge.color, background: badge.bg }}>
-                          {badge.label}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+                            style={{ color: badge.color, background: badge.bg }}>
+                            {badge.label}
+                          </span>
+                          <ChevronRight size={14} color={COLORS.inkSoft} />
+                        </div>
                       </div>
                       {noPhysical ? (
                         <p className="text-[12px] italic" style={{ color: COLORS.inkSoft }}>
@@ -101,7 +108,7 @@ export default function AttendanceHistoryScreen() {
                           )}
                         </div>
                       )}
-                    </div>
+                    </button>
                   )
                 })}
               </div>
