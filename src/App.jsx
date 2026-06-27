@@ -3,6 +3,7 @@ import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import BottomNav from './components/BottomNav'
 import NetworkBanner from './components/NetworkBanner'
 import Toast from './components/Toast'
+import AttendanceDetailScreen from './screens/AttendanceDetailScreen'
 import AttendanceHistoryScreen from './screens/AttendanceHistoryScreen'
 import AttendanceScreen from './screens/AttendanceScreen'
 import CameraScreen from './screens/CameraScreen'
@@ -51,6 +52,7 @@ export default function App() {
           <Route path="/" element={<HomeScreen />} />
           <Route path="/attendance" element={<AttendanceScreen />} />
           <Route path="/attendance-history" element={<AttendanceHistoryScreen />} />
+          <Route path="/attendance-history/:id" element={<AttendanceDetailScreen />} />
           <Route path="/jadwal" element={<JadwalScreen />} />
           <Route path="/camera/:mode" element={<CameraScreen />} />
           <Route path="/report" element={<ReportScreen />} />
