@@ -1,4 +1,4 @@
-import { Plus, X, FileText, ChevronRight, CheckCircle, Edit3, Clock, Trash2 } from "lucide-react";
+import { X, FileText, ChevronRight, CheckCircle, Edit3, Clock, Trash2, Camera, Image as ImageIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ScreenHeader from "../components/ScreenHeader";
@@ -24,7 +24,8 @@ function nowHHMM() {
 
 export default function ReportScreen() {
   const navigate = useNavigate();
-  const inputRef = useRef(null);
+  const cameraRef = useRef(null);
+  const galleryRef = useRef(null);
   const {
     reports, loading, submitting, error,
     loadReports, saveReport, updateReport, deleteReport, clearError,
@@ -33,7 +34,6 @@ export default function ReportScreen() {
   // Form state — kalau editingId null = mode "tambah", kalau ada = mode edit row tsb
   const [editingId, setEditingId] = useState(null);
   const [judul, setJudul] = useState('');
-  const [waktu, setWaktu] = useState(nowHHMM());
   const [photos, setPhotos] = useState([]);
   const [description, setDescription] = useState('');
 
@@ -50,7 +50,6 @@ export default function ReportScreen() {
   const resetForm = () => {
     setEditingId(null);
     setJudul('');
-    setWaktu(nowHHMM());
     setPhotos([]);
     setDescription('');
     setLocalError('');
@@ -59,7 +58,6 @@ export default function ReportScreen() {
   const startEdit = (r) => {
     setEditingId(r.id);
     setJudul(r.judul || '');
-    setWaktu(r.waktu || nowHHMM());
     setPhotos(r.foto || []);
     setDescription(r.deskripsi || '');
     setLocalError('');
@@ -96,9 +94,9 @@ export default function ReportScreen() {
       setLocalError('Deskripsi wajib diisi.'); return;
     }
 
+    // Waktu otomatis di-set di backend (now()), jadi tidak perlu dikirim dari form
     const payload = {
       judul: judul.trim() || null,
-      waktu: waktu || null,
       description: description.trim(),
       photos,
     };
@@ -148,22 +146,14 @@ export default function ReportScreen() {
       )}
 
       <form onSubmit={submit}>
-        {/* Judul + waktu */}
-        <div className="flex gap-2 mb-3">
-          <label className="flex-1">
-            <span className="mb-2 block text-[12px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Judul (opsional)</span>
-            <input value={judul} onChange={(e) => setJudul(e.target.value)} maxLength={80}
-              placeholder="cth: Rawat kuda pagi"
-              className="h-11 w-full rounded-xl border bg-white px-3 text-[14px]"
-              style={{ borderColor: COLORS.border, color: COLORS.ink }} />
-          </label>
-          <label className="w-[110px]">
-            <span className="mb-2 block text-[12px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Waktu</span>
-            <input type="time" value={waktu} onChange={(e) => setWaktu(e.target.value)}
-              className="h-11 w-full rounded-xl border bg-white px-3 text-[14px]"
-              style={{ borderColor: COLORS.border, color: COLORS.ink }} />
-          </label>
-        </div>
+        {/* Judul */}
+        <label className="block mb-3">
+          <span className="mb-2 block text-[12px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Judul (opsional)</span>
+          <input value={judul} onChange={(e) => setJudul(e.target.value)} maxLength={80}
+            placeholder="cth: Rawat kuda pagi"
+            className="h-11 w-full rounded-xl border bg-white px-3 text-[14px]"
+            style={{ borderColor: COLORS.border, color: COLORS.ink }} />
+        </label>
 
         {/* Foto */}
         <section>
@@ -185,16 +175,28 @@ export default function ReportScreen() {
                 <span className="text-[10px] font-bold animate-pulse" style={{ color: COLORS.inkSoft }}>Memproses...</span>
               </div>
             )}
-            {photos.length < MAX_FOTO && !compressing && (
-              <button type="button" onClick={() => inputRef.current?.click()}
-                className="flex h-20 w-20 flex-col items-center justify-center rounded-xl border border-dashed"
-                style={{ borderColor: COLORS.border, color: COLORS.terracotta }}>
-                <Plus size={24} />
-                <span className="mt-1 text-[11px]" style={{ color: COLORS.inkSoft }}>Tambah</span>
-              </button>
-            )}
           </div>
-          <input ref={inputRef} onChange={addPhotos} type="file" accept="image/*" capture="environment" multiple className="hidden" />
+
+          {/* Tombol pilih sumber foto */}
+          {photos.length < MAX_FOTO && !compressing && (
+            <div className="flex gap-2 mb-2">
+              <button type="button" onClick={() => cameraRef.current?.click()}
+                className="flex-1 flex items-center justify-center gap-1.5 h-11 rounded-xl border-[1.5px] text-[13px] font-bold"
+                style={{ borderColor: COLORS.terracotta, color: COLORS.terracotta, background: 'white' }}>
+                <Camera size={16} /> Kamera
+              </button>
+              <button type="button" onClick={() => galleryRef.current?.click()}
+                className="flex-1 flex items-center justify-center gap-1.5 h-11 rounded-xl border-[1.5px] text-[13px] font-bold"
+                style={{ borderColor: COLORS.border, color: COLORS.inkSoft, background: 'white' }}>
+                <ImageIcon size={16} /> Galeri
+              </button>
+            </div>
+          )}
+
+          {/* Input tersembunyi */}
+          <input ref={cameraRef} onChange={addPhotos} type="file" accept="image/*" capture="environment" className="hidden" />
+          <input ref={galleryRef} onChange={addPhotos} type="file" accept="image/*" multiple className="hidden" />
+
           <p className="text-[11.5px]" style={{ color: COLORS.inkSoft }}>Min {MIN_FOTO}, max {MAX_FOTO} foto.</p>
         </section>
 
