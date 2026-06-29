@@ -30,20 +30,20 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       devOptions: { enabled: true },
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
+      includeAssets: ['logo.png'],
       manifest: {
-        name: 'Catatan Tugas',
-        short_name: 'Catatan Tugas',
+        name: 'PresenZ',
+        short_name: 'PresenZ',
         description: 'Absensi dan laporan kerja harian karyawan.',
-        theme_color: '#C96342',
+        theme_color: '#3B3E94',
         background_color: '#FAF6F0',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',
         icons: [
-          { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-          { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-          { src: '/pwa-maskable-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+          { src: '/logo.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/logo.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: '/logo.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       },
       workbox: { globPatterns: ['**/*.{js,css,html,svg,png,ico}'] }
