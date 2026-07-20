@@ -11,6 +11,8 @@ import ChangePasswordScreen from './screens/ChangePasswordScreen'
 import HomeScreen from './screens/HomeScreen'
 import JadwalScreen from './screens/JadwalScreen'
 import LoginScreen from './screens/LoginScreen'
+import PayrollDetailScreen from './screens/PayrollDetailScreen'
+import PayrollScreen from './screens/PayrollScreen'
 import ProfileScreen from './screens/ProfileScreen'
 import ReportDetailScreen from './screens/ReportDetailScreen'
 import ReportListScreen from './screens/ReportListScreen'
@@ -62,6 +64,8 @@ export default function App() {
           <Route path="/requests" element={<RequestListScreen />} />
           <Route path="/requests/:id" element={<RequestDetailScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
+          <Route path="/payroll" element={<PayrollScreen />} />
+          <Route path="/payroll/:id" element={<PayrollDetailScreen />} />
           <Route path="/change-password" element={<ChangePasswordScreen />} />
         </Route>
         <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
