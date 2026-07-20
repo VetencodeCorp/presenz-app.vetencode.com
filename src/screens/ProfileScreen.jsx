@@ -1,4 +1,4 @@
-import { Bell, Briefcase, ChevronRight, HelpCircle, Lock, LogOut, Phone, Mail, MapPin } from 'lucide-react'
+import { Bell, Briefcase, ChevronRight, HelpCircle, Lock, LogOut, Phone, Mail, MapPin, WalletCards } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import Avatar from '../components/Avatar'
 import { COLORS } from '../constants/colors'
@@ -6,6 +6,7 @@ import { useAuthStore } from '../store/useAuthStore'
 import { useAttendanceStore } from '../store/useAttendanceStore'
 import api from '../lib/axios'
 import { useReportStore } from '../store/useReportStore'
+import { usePayrollStore } from '../store/usePayrollStore'
 
 function InfoRow({ icon: Icon, label, value }) {
   return <div className="flex min-h-[64px] items-center border-b px-5 last:border-b-0" style={{ borderColor: COLORS.border }}>
@@ -28,11 +29,13 @@ export default function ProfileScreen() {
   const { employee, logout } = useAuthStore()
   const resetAttendance = useAttendanceStore((state) => state.resetAttendance)
   const resetReport = useReportStore((state) => state.resetReport)
+  const resetPayroll = usePayrollStore((state) => state.resetPayroll)
 
   const signOut = () => {
     api.post('/logout').catch(() => {})
     resetAttendance()
     resetReport()
+    resetPayroll()
     logout()
     navigate('/login', { replace: true })
   }
@@ -65,6 +68,7 @@ export default function ProfileScreen() {
       </section>
 
       <section className="mt-8 overflow-hidden rounded-2xl border bg-white" style={{ borderColor: COLORS.border }}>
+        <MenuRow icon={WalletCards} label="Slip Gaji" onClick={() => navigate('/payroll')} />
         <MenuRow icon={Lock} label="Ubah Kata Sandi" onClick={() => navigate('/change-password')} />
         <MenuRow icon={Bell} label="Pengaturan Notifikasi" />
         <MenuRow icon={HelpCircle} label="Bantuan" />
