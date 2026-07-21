@@ -8,6 +8,8 @@ import AttendanceHistoryScreen from './screens/AttendanceHistoryScreen'
 import AttendanceScreen from './screens/AttendanceScreen'
 import CameraScreen from './screens/CameraScreen'
 import ChangePasswordScreen from './screens/ChangePasswordScreen'
+import EvaluationDetailScreen from './screens/EvaluationDetailScreen'
+import EvaluationScreen from './screens/EvaluationScreen'
 import HomeScreen from './screens/HomeScreen'
 import JadwalScreen from './screens/JadwalScreen'
 import LoginScreen from './screens/LoginScreen'
@@ -66,6 +68,8 @@ export default function App() {
           <Route path="/profile" element={<ProfileScreen />} />
           <Route path="/payroll" element={<PayrollScreen />} />
           <Route path="/payroll/:id" element={<PayrollDetailScreen />} />
+          <Route path="/evaluations" element={<EvaluationScreen />} />
+          <Route path="/evaluations/:id" element={<EvaluationDetailScreen />} />
           <Route path="/change-password" element={<ChangePasswordScreen />} />
         </Route>
         <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
