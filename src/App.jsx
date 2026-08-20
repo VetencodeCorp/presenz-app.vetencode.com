@@ -22,6 +22,7 @@ import ReportScreen from './screens/ReportScreen'
 import RequestDetailScreen from './screens/RequestDetailScreen'
 import RequestListScreen from './screens/RequestListScreen'
 import RequestScreen from './screens/RequestScreen'
+import SupervisionScreen from './screens/SupervisionScreen'
 import { useAuthStore } from './store/useAuthStore'
 import { useNetworkStore } from './store/useNetworkStore'
 
@@ -36,6 +37,11 @@ function ProtectedLayout() {
 
   const hideNav = location.pathname.startsWith('/camera')
   return <><Outlet />{!hideNav && <BottomNav />}</>
+}
+
+function RoleRoute({ role, children }) {
+  const currentRole = useAuthStore((state) => state.employee?.role)
+  return currentRole === role ? children : <Navigate to="/" replace />
 }
 
 export default function App() {
@@ -59,9 +65,10 @@ export default function App() {
           <Route path="/attendance-history/:id" element={<AttendanceDetailScreen />} />
           <Route path="/jadwal" element={<JadwalScreen />} />
           <Route path="/camera/:mode" element={<CameraScreen />} />
-          <Route path="/report" element={<ReportScreen />} />
-          <Route path="/reports" element={<ReportListScreen />} />
-          <Route path="/reports/:id" element={<ReportDetailScreen />} />
+          <Route path="/report" element={<RoleRoute role="karyawan"><ReportScreen /></RoleRoute>} />
+          <Route path="/reports" element={<RoleRoute role="karyawan"><ReportListScreen /></RoleRoute>} />
+          <Route path="/reports/:id" element={<RoleRoute role="karyawan"><ReportDetailScreen /></RoleRoute>} />
+          <Route path="/supervision" element={<RoleRoute role="pengawas"><SupervisionScreen /></RoleRoute>} />
           <Route path="/request" element={<RequestScreen />} />
           <Route path="/requests" element={<RequestListScreen />} />
           <Route path="/requests/:id" element={<RequestDetailScreen />} />

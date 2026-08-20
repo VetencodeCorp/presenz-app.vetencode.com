@@ -29,7 +29,8 @@ export const useAuthStore = create(
               alamat: karyawan.alamat,
               photo: user.foto,
               email: user.email,
-              role: 'Karyawan',
+              role: user.role,
+              roleLabel: user.role === 'pengawas' ? 'Pengawas' : 'Karyawan',
             },
             token, isAuthenticated: true, loading: false, error: '', networkError: false,
           })
@@ -62,7 +63,8 @@ export const useAuthStore = create(
               alamat: karyawan?.alamat ?? state.employee?.alamat,
               photo: user.foto,
               email: user.email,
-              role: state.employee?.role || 'Karyawan',
+              role: user.role,
+              roleLabel: user.role === 'pengawas' ? 'Pengawas' : 'Karyawan',
             },
           }))
           return true

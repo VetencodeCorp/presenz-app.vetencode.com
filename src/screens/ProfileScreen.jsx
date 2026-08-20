@@ -8,6 +8,7 @@ import api from '../lib/axios'
 import { useReportStore } from '../store/useReportStore'
 import { usePayrollStore } from '../store/usePayrollStore'
 import { useEvaluationStore } from '../store/useEvaluationStore'
+import { useSupervisionStore } from '../store/useSupervisionStore'
 
 function InfoRow({ icon: Icon, label, value }) {
   return <div className="flex min-h-[64px] items-center border-b px-5 last:border-b-0" style={{ borderColor: COLORS.border }}>
@@ -32,6 +33,7 @@ export default function ProfileScreen() {
   const resetReport = useReportStore((state) => state.resetReport)
   const resetPayroll = usePayrollStore((state) => state.resetPayroll)
   const resetEvaluation = useEvaluationStore((state) => state.resetEvaluation)
+  const resetSupervision = useSupervisionStore((state) => state.reset)
 
   const signOut = () => {
     api.post('/logout').catch(() => {})
@@ -39,6 +41,7 @@ export default function ProfileScreen() {
     resetReport()
     resetPayroll()
     resetEvaluation()
+    resetSupervision()
     logout()
     navigate('/login', { replace: true })
   }
@@ -60,7 +63,7 @@ export default function ProfileScreen() {
           />
         </div>
         <h1 className="fraunces mt-4 text-[26px] font-bold" style={{ color: COLORS.ink }}>{employee?.name}</h1>
-        <span className="mt-3 inline-flex rounded-full px-5 py-2 text-[14px] font-bold" style={{ background: COLORS.sageBg, color: COLORS.sage }}>{employee?.role || 'Karyawan'}</span>
+        <span className="mt-3 inline-flex rounded-full px-5 py-2 text-[14px] font-bold" style={{ background: COLORS.sageBg, color: COLORS.sage }}>{employee?.roleLabel || 'Karyawan'}</span>
       </section>
 
       <section className="overflow-hidden rounded-2xl border bg-white" style={{ borderColor: COLORS.border }}>
