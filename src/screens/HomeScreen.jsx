@@ -1,4 +1,4 @@
-import { Bell, CalendarDays, ChevronRight, Clock, Coffee, LogIn, LogOut } from 'lucide-react'
+import { Bell, CalendarDays, ChevronRight, Clock, Coffee, ListChecks, LogIn, LogOut } from 'lucide-react'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Avatar from '../components/Avatar'
@@ -114,6 +114,7 @@ export default function HomeScreen() {
   const { jadwal, loadJadwal } = useJadwalStore()
   const durasiKerja = durasi(checkIn.time, checkOut.time)
   const todayJadwal = jadwal.hari.find((h) => h.is_today)
+  const isSupervisor = employee?.role === 'pengawas'
 
   useEffect(() => {
     if (employee) {
@@ -122,7 +123,7 @@ export default function HomeScreen() {
       loadMonthSummary()
       loadJadwal()
       loadRiwayat({ limit: 5 })
-      loadReports()
+      if (employee.role === 'karyawan') loadReports()
     }
   }, [employee?.id, refreshMe, loadToday, loadMonthSummary, loadJadwal, loadRiwayat, loadReports])
 
@@ -277,27 +278,27 @@ export default function HomeScreen() {
         )}
       </section>
 
-      <button onClick={() => navigate('/report')}
-        className="mt-6 w-full rounded-2xl p-6 text-left text-white"
-        style={{ background: submitted ? COLORS.sage : COLORS.terracotta, boxShadow: '0 8px 20px rgba(59,62,148,0.28)' }}>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="mb-4 text-[13px] font-bold uppercase tracking-wide">{submitted ? 'Sudah Dilaporkan' : 'Belum Dilaporkan'}</p>
-            <h2 className="fraunces text-[22px] font-bold leading-tight">
-              {submitted ? 'Laporan kegiatan hari ini sudah dikirim' : 'Laporan kegiatan hari ini belum dikirim'}
-            </h2>
-            <p className="mt-3 text-[13px] opacity-90">Tap untuk {submitted ? 'melihat dan mengubah laporan' : 'menulis laporan & unggah foto'}</p>
+      {isSupervisor ? <button onClick={() => navigate('/supervision')} className="mt-6 w-full rounded-2xl p-6 text-left text-white" style={{ background: COLORS.primary, boxShadow: '0 8px 20px rgba(59,62,148,0.28)' }}><div className="flex items-start justify-between gap-4"><div><p className="mb-4 text-[13px] font-bold uppercase tracking-wide">Monitoring Wilayah</p><h2 className="fraunces text-[22px] font-bold leading-tight">Periksa todo wilayah yang ditugaskan</h2><p className="mt-3 text-[13px] opacity-90">Isi hasil, keterangan, dan foto bukti untuk setiap pemeriksaan.</p></div><span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20"><ListChecks size={31} /></span></div></button> : <>
+        <button onClick={() => navigate('/report')}
+          className="mt-6 w-full rounded-2xl p-6 text-left text-white"
+          style={{ background: submitted ? COLORS.sage : COLORS.terracotta, boxShadow: '0 8px 20px rgba(59,62,148,0.28)' }}>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="mb-4 text-[13px] font-bold uppercase tracking-wide">{submitted ? 'Sudah Dilaporkan' : 'Belum Dilaporkan'}</p>
+              <h2 className="fraunces text-[22px] font-bold leading-tight">
+                {submitted ? 'Laporan kegiatan hari ini sudah dikirim' : 'Laporan kegiatan hari ini belum dikirim'}
+              </h2>
+              <p className="mt-3 text-[13px] opacity-90">Tap untuk {submitted ? 'melihat dan mengubah laporan' : 'menulis laporan & unggah foto'}</p>
+            </div>
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20"><ChevronRight size={34} /></span>
           </div>
-          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20"><ChevronRight size={34} /></span>
-        </div>
-      </button>
+        </button>
 
-      <div className="mt-6 flex gap-4 rounded-2xl px-5 py-4" style={{ background: COLORS.ochreBg, color: COLORS.inkSoft }}>
-        <Bell className="mt-1 shrink-0" color={COLORS.ochre} size={22} />
-        <p className="text-[14px] leading-relaxed">Laporan masih bisa diubah sampai tengah malam. Setelah itu otomatis terkunci.</p>
-      </div>
+        <div className="mt-6 flex gap-4 rounded-2xl px-5 py-4" style={{ background: COLORS.ochreBg, color: COLORS.inkSoft }}>
+          <Bell className="mt-1 shrink-0" color={COLORS.ochre} size={22} />
+          <p className="text-[14px] leading-relaxed">Laporan masih bisa diubah sampai tengah malam. Setelah itu otomatis terkunci.</p>
+        </div>
+      </>}
     </main>
   )
 }
-
-

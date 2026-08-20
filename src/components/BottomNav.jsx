@@ -1,8 +1,9 @@
-import { Camera, ClipboardList, FileText, Home, User } from 'lucide-react'
+import { Camera, ClipboardList, FileText, Home, ListChecks, User } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { COLORS } from '../constants/colors'
+import { useAuthStore } from '../store/useAuthStore'
 
-const items = [
+const baseItems = [
   { to: '/', label: 'Beranda', icon: Home },
   { to: '/attendance', label: 'Absen', icon: Camera },
   { to: '/report', label: 'Laporan', icon: ClipboardList },
@@ -11,6 +12,10 @@ const items = [
 ]
 
 export default function BottomNav() {
+  const role = useAuthStore((state) => state.employee?.role)
+  const items = baseItems.map((item) => item.to === '/report' && role === 'pengawas'
+    ? { to: '/supervision', label: 'Pengawasan', icon: ListChecks }
+    : item)
   return (
     <nav className="fixed bottom-0 left-1/2 z-40 flex h-[72px] w-full max-w-[430px] -translate-x-1/2 items-stretch border-t pb-2" style={{ background: COLORS.white, borderColor: COLORS.border }}>
       {items.map(({ to, label, icon: Icon }) => (
