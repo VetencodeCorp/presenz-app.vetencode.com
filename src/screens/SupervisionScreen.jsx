@@ -1,7 +1,10 @@
 import { Camera, CheckCircle2, ChevronDown, ChevronUp, ClipboardCheck, ImagePlus, MapPin, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { COLORS } from '../constants/colors'
+import { compressImages } from '../lib/compressImage'
 import { useSupervisionStore } from '../store/useSupervisionStore'
+
+const MAX_PHOTOS = 6
 
 const statusOptions = [
   { value: 'sesuai', label: 'Sesuai', color: COLORS.sage, bg: COLORS.sageBg },
@@ -62,10 +65,19 @@ function SubmitSheet({ item, close }) {
   const [status, setStatus] = useState(item.status_hasil === 'belum_diperiksa' ? '' : item.status_hasil)
   const [keterangan, setKeterangan] = useState(item.keterangan || '')
   const [photos, setPhotos] = useState([])
+  const [compressing, setCompressing] = useState(false)
   const [location, setLocation] = useState(null)
   const [locating, setLocating] = useState(true)
   const [locationError, setLocationError] = useState('')
   const [message, setMessage] = useState('')
+  const cameraRef = useRef(null)
+  const galleryRef = useRef(null)
+  const photosRef = useRef([])
+
+  useEffect(() => { photosRef.current = photos }, [photos])
+  useEffect(() => () => {
+    photosRef.current.forEach((photo) => URL.revokeObjectURL(photo.preview))
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -94,11 +106,35 @@ function SubmitSheet({ item, close }) {
     return () => { active = false }
   }, [item.id])
 
-  const handlePhotos = (event) => setPhotos(Array.from(event.target.files || []).slice(0, 6))
+  const addPhotos = async (event) => {
+    const files = Array.from(event.target.files || []).slice(0, MAX_PHOTOS - photos.length)
+    event.target.value = ''
+    if (files.length === 0) return
+
+    setCompressing(true)
+    setMessage('')
+    try {
+      const compressed = await compressImages(files, { maxWidth: 1280, maxHeight: 1280, quality: 0.75 })
+      const additions = compressed.map((file) => ({ file, preview: URL.createObjectURL(file) }))
+      setPhotos((current) => [...current, ...additions].slice(0, MAX_PHOTOS))
+    } catch {
+      setMessage('Gagal memproses foto. Coba foto lain.')
+    } finally {
+      setCompressing(false)
+    }
+  }
+
+  const removePhoto = (index) => {
+    setPhotos((current) => {
+      URL.revokeObjectURL(current[index].preview)
+      return current.filter((_, photoIndex) => photoIndex !== index)
+    })
+  }
+
   const save = async () => {
     if (!status || !keterangan.trim() || (item.wajib_foto && photos.length === 0)) { setMessage('Status, keterangan, dan foto bukti wajib diisi.'); return }
     if (!location) { setMessage(locationError || 'Tunggu sampai lokasi GPS berhasil dibaca.'); return }
-    const result = await submit(item.id, { status, keterangan, photos, ...(location || {}) })
+    const result = await submit(item.id, { status, keterangan, photos: photos.map((photo) => photo.file), ...(location || {}) })
     if (result.success) close(); else setMessage(result.message)
   }
 
@@ -106,10 +142,15 @@ function SubmitSheet({ item, close }) {
     <div className="mb-5 flex items-start justify-between"><div><p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: COLORS.primary }}>Todo Pengawasan</p><h2 className="fraunces mt-1 text-[24px] font-bold" style={{ color: COLORS.ink }}>{item.judul}</h2>{item.deskripsi && <p className="mt-2 text-[13px] leading-relaxed" style={{ color: COLORS.inkSoft }}>{item.deskripsi}</p>}</div><button onClick={close} className="rounded-xl p-2" style={{ background: COLORS.paperDark }}><X size={19} /></button></div>
     <label className="text-[11px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Hasil Pemeriksaan</label><div className="mt-2 grid gap-2">{statusOptions.map((option) => <button key={option.value} onClick={() => setStatus(option.value)} className="rounded-xl border p-3 text-left text-[13px] font-bold" style={{ borderColor: status === option.value ? option.color : COLORS.border, background: status === option.value ? option.bg : COLORS.white, color: status === option.value ? option.color : COLORS.ink }}>{option.label}</button>)}</div>
     <label className="mt-5 block text-[11px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Keterangan</label><textarea rows={4} value={keterangan} onChange={(e) => setKeterangan(e.target.value)} className="mt-2 w-full resize-none rounded-2xl border p-4 text-[14px] outline-none" style={{ borderColor: COLORS.border }} placeholder="Jelaskan kondisi yang ditemukan..." />
-    <label className="mt-5 block text-[11px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Foto Bukti {item.wajib_foto ? '(Wajib)' : '(Opsional)'}</label><label className="mt-2 flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed py-5 text-[13px] font-bold" style={{ borderColor: COLORS.primary, color: COLORS.primary, background: COLORS.primaryLight }}><ImagePlus size={21} />{photos.length ? `${photos.length} foto dipilih` : 'Pilih Foto'}<input type="file" accept="image/*" capture="environment" multiple onChange={handlePhotos} className="hidden" /></label>
+    <div className="mt-5 flex items-center justify-between"><label className="text-[11px] font-bold uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Foto Bukti {item.wajib_foto ? '(Wajib)' : '(Opsional)'}</label><span className="text-[11px] font-bold" style={{ color: COLORS.primary }}>{photos.length}/{MAX_PHOTOS}</span></div>
+    {photos.length > 0 && <div className="mt-2 grid grid-cols-3 gap-2">{photos.map((photo, index) => <div key={photo.preview} className="relative aspect-square overflow-hidden rounded-xl border" style={{ borderColor: COLORS.border }}><img src={photo.preview} alt={`Bukti ${index + 1}`} className="h-full w-full object-cover" /><button type="button" onClick={() => removePhoto(index)} className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-white shadow"><X size={14} color={COLORS.rust} /></button></div>)}</div>}
+    {photos.length < MAX_PHOTOS && <div className="mt-2 grid grid-cols-2 gap-2"><button type="button" disabled={compressing} onClick={() => cameraRef.current?.click()} className="flex items-center justify-center gap-2 rounded-xl border py-3 text-[13px] font-bold disabled:opacity-50" style={{ borderColor: COLORS.primary, color: COLORS.primary, background: COLORS.primaryLight }}><Camera size={18} /> Kamera</button><button type="button" disabled={compressing} onClick={() => galleryRef.current?.click()} className="flex items-center justify-center gap-2 rounded-xl border py-3 text-[13px] font-bold disabled:opacity-50" style={{ borderColor: COLORS.border, color: COLORS.inkSoft }}><ImagePlus size={18} /> Galeri</button></div>}
+    <input ref={cameraRef} type="file" accept="image/*" capture="environment" onChange={addPhotos} className="hidden" />
+    <input ref={galleryRef} type="file" accept="image/*" multiple onChange={addPhotos} className="hidden" />
+    <p className="mt-2 text-[11px]" style={{ color: COLORS.inkSoft }}>{compressing ? 'Memproses foto...' : `Maksimal ${MAX_PHOTOS} foto. Foto kamera bisa ditambahkan satu per satu.`}</p>
     {locationError && <p className="mt-3 text-center text-[11px] font-semibold" style={{ color: COLORS.rust }}>{locationError}</p>}
     {message && <p className="mt-3 text-center text-[12px] font-semibold" style={{ color: COLORS.rust }}>{message}</p>}
-    <button disabled={submitting || locating} onClick={save} className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-[15px] font-bold text-white disabled:opacity-50" style={{ background: COLORS.primary }}><Camera size={20} />{submitting ? 'Menyimpan...' : locating ? 'Menyiapkan form...' : 'Simpan Pemeriksaan'}</button>
+    <button disabled={submitting || locating || compressing} onClick={save} className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-[15px] font-bold text-white disabled:opacity-50" style={{ background: COLORS.primary }}><Camera size={20} />{submitting ? 'Menyimpan...' : locating ? 'Menyiapkan form...' : compressing ? 'Memproses foto...' : 'Simpan Pemeriksaan'}</button>
   </section></div>
 }
 
